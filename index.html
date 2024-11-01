@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exibir Informações do Cliente</title>
+</head>
+<body>
+  <h1>Informações do Cliente</h1>
+  <button onclick="consultarClientes()">Mostrar Informações</button>
+  <div id="divClientes"></div>
+
+  <script>
+    async function consultarClientes() {
+      try {
+        const resposta = await fetch("http://localhost:3000/cliente");
+        const tabela = await resposta.json();
+        const div = document.querySelector("#divClientes");
+        div.innerHTML = "<h1>Clientes:</h1>";
+        tabela.forEach((linha) => {
+          div.innerHTML += `
+            <hr>
+            <p><strong>Nome:</strong> ${linha.nome}</p>
+            <p><strong>Email:</strong> ${linha.email}</p>
+            <p><strong>Telefone:</strong> ${linha.tel}</p>
+            <p><strong>CPF:</strong> ${linha.cpf}</p>
+            <p><strong>Código Cliente:</strong> ${linha.codCli}</p>
+          `;
+        });
+      } catch (error) {
+        console.error("Erro ao consultar clientes", error);
+      }
+    }
+  </script>
+</body>
+</html>
