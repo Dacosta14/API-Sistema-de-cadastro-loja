@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Exibir Informações do Cliente</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-  <h1>Informações do Cliente</h1>
-  <button onclick="consultarClientes()">Mostrar Informações</button>
-  <div id="divClientes"></div>
+  <div class="container text-center mt-5">
+    <h1 class="mb-4">Informações do Cliente</h1>
+    <button onclick="consultarClientes()" class="btn btn-primary">Mostrar Informações</button>
+    <div id="divClientes" class="mt-4"></div>
+  </div>
 
   <script>
     async function consultarClientes() {
@@ -16,7 +19,7 @@
         const resposta = await fetch("http://localhost:3000/cliente");
         const tabela = await resposta.json();
         const div = document.querySelector("#divClientes");
-        div.innerHTML = "<h1>Clientes:</h1>";
+        div.innerHTML = "<h2>Clientes:</h2>";
         tabela.forEach((linha) => {
           div.innerHTML += `
             <hr>
