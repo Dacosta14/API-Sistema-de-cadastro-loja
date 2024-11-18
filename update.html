@@ -2,70 +2,169 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Atualizar Cliente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Cliente</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #141e30, #243b55);
+      color: #fff;
+    }
+    header {
+      background: #1b2838;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    header h1 {
+      margin: 0;
+      color: #fff;
+    }
+    .form-container {
+      background: #f8f9fa;
+      color: #333;
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 30px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    .btn-primary {
+      background: linear-gradient(45deg, #007bff, #0056b3);
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(45deg, #0056b3, #003d80);
+    }
+    .custom-alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 5px;
+      color: #fff;
+      display: none;
+      z-index: 1000;
+    }
+    .alert-success {
+      background-color: #28a745;
+    }
+    .alert-error {
+      background-color: #dc3545;
+    }
+  </style>
 </head>
 <body>
-  <div class="container mt-5">
-    <h2>Atualizar Cliente</h2>
-    <form id="updateForm">
-      <div class="mb-3">
-        <label for="id" class="form-label">ID do Cliente</label>
-        <input type="text" class="form-control" id="id" name="id" required>
-      </div>
-      <div class="mb-3">
-        <label for="nome" class="form-label">Nome</label>
-        <input type="text" class="form-control" id="nome" name="nome">
-      </div>
-      <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email">
-      </div>
-      <div class="mb-3">
-        <label for="senha" class="form-label">Senha</label>
-        <input type="password" class="form-control" id="senha" name="senha">
-      </div>
-      <div class="mb-3">
-        <label for="tel" class="form-label">Telefone</label>
-        <input type="tel" class="form-control" id="tel" name="tel">
-      </div>
-      <div class="mb-3">
-        <label for="cpf" class="form-label">CPF</label>
-        <input type="text" class="form-control" id="cpf" name="cpf">
-      </div>
-      <div class="mb-3">
-        <label for="codCli" class="form-label">Código Cliente</label>
-        <input type="text" class="form-control" id="codCli" name="codCli">
-      </div>
-      <button type="button" class="btn btn-primary" onclick="atualizarCliente()">Atualizar</button>
-    </form>
-  </div>
+  <header>
+    <h1>Editar Cliente</h1>
+  </header>
+
+  <main class="container">
+    <div class="form-container">
+      <form id="updateForm">
+        <input type="hidden" id="clienteId">
+        <div class="mb-3">
+          <label for="nome" class="form-label">Nome</label>
+          <input type="text" class="form-control" id="nome" placeholder="Digite o nome" required>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" placeholder="Digite o email" required>
+        </div>
+        <div class="mb-3">
+          <label for="tel" class="form-label">Telefone</label>
+          <input type="tel" class="form-control" id="tel" placeholder="Digite o telefone" required>
+        </div>
+        <div class="mb-3">
+          <label for="tel" class="form-label">CPF</label>
+          <input type="tel" class="form-control" id="cpf" placeholder="digite o cpf" required>
+        </div>
+        <div class="mb-3">
+          <label for="tel" class="form-label">senha</label>
+          <input type="tel" class="form-control" id="senha" placeholder="Digite o CPF" required>
+        </div>
+        
+        <div class="d-flex justify-content-between">
+          <a href="index.html" class="btn btn-secondary">Voltar</a>
+          <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <div id="alertBox" class="custom-alert"></div>
 
   <script>
-    async function atualizarCliente() {
-      const id = document.getElementById("id").value;
+    document.addEventListener("DOMContentLoaded", async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const clienteId = urlParams.get("id");
+      const clienteIdField = document.getElementById("clienteId");
+
+      if (clienteId) {
+        clienteIdField.value = clienteId;
+        try {
+          const resposta = await fetch(`http://localhost:3000/Cliente/${clienteId}`);
+          if (resposta.ok) {
+            const cliente = await resposta.json();
+            document.getElementById("nome").value = cliente.nome;
+            document.getElementById("email").value = cliente.email;
+            document.getElementById("tel").value = cliente.tel;
+            document.getElementById("cpf").value = cliente.cpf;
+            document.getElementById("senha").value = cliente.senha;
+          } else {
+            showAlert("Erro ao carregar dados do cliente!", "error");
+          }
+        } catch (error) {
+          showAlert("Erro ao carregar dados do cliente!", "error");
+        }
+      } else {
+        showAlert("Cliente não encontrado!", "error");
+      }
+    });
+
+    document.getElementById("updateForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const clienteId = document.getElementById("clienteId").value;
       const nome = document.getElementById("nome").value;
       const email = document.getElementById("email").value;
-      const senha = document.getElementById("senha").value;
       const tel = document.getElementById("tel").value;
       const cpf = document.getElementById("cpf").value;
-      const codCli = document.getElementById("codCli").value;
+      const senha = document.getElementById("senha").value;
 
       try {
-        const response = await fetch(`http://localhost:3000/cliente/${id}`, {
+        const resposta = await fetch(`http://localhost:3000/Cliente/${clienteId}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ nome, email, senha, tel, cpf, codCli }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nome, email, tel, senha, cpf }),
         });
-        const data = await response.json();
-        alert("Cliente atualizado com sucesso");
+
+        if (resposta.ok) {
+          showAlert("Cliente atualizado com sucesso!", "success");
+          setTimeout(() => window.location.href = "index.html", 3000);
+        } else {
+          showAlert("Erro ao atualizar cliente!", "error");
+        }
       } catch (error) {
-        console.error("Erro ao atualizar cliente", error);
-        alert("Erro ao atualizar cliente");
+        showAlert("Erro ao atualizar cliente!", "error");
       }
-    }
+    });
+
+    const showAlert = (message, type) => {
+      const alertBox = document.getElementById("alertBox");
+      alertBox.textContent = message;
+      alertBox.className = `custom-alert alert-${type}`;
+      alertBox.style.display = "block";
+
+      setTimeout(() => {
+        alertBox.style.display = "none";
+      }, 3000);
+    };
   </script>
 </body>
 </html>

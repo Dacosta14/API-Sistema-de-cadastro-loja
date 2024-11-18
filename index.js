@@ -1,108 +1,78 @@
 import express from "express";
-import path from "path";
 import cors from "cors";
 import bodyParser from "body-parser";
 import Cliente from "./conexão_sequelize.js"; // Importa o modelo Cliente
 
-const server = express();
-const __dirname = path.resolve();
+const app = express();
+const PORT = 3000;
 
 // Middlewares
-server.use(cors());
-server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
+app.use(bodyParser.json());
 
-// Página inicial
-server.get("/", (req, res) => {
-  return res.send("Página inicial");
-});
+// Rotas
+app.get("/", (req, res) => res.send("API de Clientes"));
 
-// ** CREATE - Rota para criar um novo cliente **
-server.post("/cliente", async (req, res) => {
+// ** CREATE **
+app.post("/Cliente", async (req, res) => {
   try {
     const { nome, email, senha, tel, cpf, codCli } = req.body;
-    const novoCliente = await Cliente.create({ nome, email, senha, tel, cpf, codCli });
+    const novoCliente = await Cliente.create({ nome, email, senha, tel, cpf, codCli, });
     res.status(201).json(novoCliente);
   } catch (error) {
-    console.error("Erro ao criar cliente: ", error);
-    res.status(500).json({ error: "Erro ao criar cliente" });
+    res.status(500).json({ error: "Erro ao criar cliente", detalhes: error.message });
   }
 });
 
-// ** READ - Rota para listar todos os clientes **
-server.get("/cliente", async (req, res) => {
+// ** READ ALL **
+app.get("/Cliente", async (req, res) => {
   try {
     const clientes = await Cliente.findAll();
     res.json(clientes);
   } catch (error) {
-    console.log("Erro ao pegar clientes: ", error);
-    res.status(500).json({ error: "Erro ao pegar clientes" });
+    res.status(500).json({ error: "Erro ao listar clientes", detalhes: error.message });
   }
 });
 
-// ** READ - Rota para pegar um cliente pelo ID **
-server.get("/cliente/:id", async (req, res) => {
+// ** READ BY ID **
+app.get("/Cliente/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-    const cliente = await Cliente.findOne({ where: { id } });
-    if (cliente) {
-      res.json(cliente);
-    } else {
-      res.status(404).json({ error: "Cliente não encontrado" });
-    }
+    const cliente = await Cliente.findByPk(req.params.id);
+    if (!cliente) return res.status(404).json({ error: "Cliente não encontrado" });
+    res.json(cliente);
   } catch (error) {
-    console.log("Erro ao achar o cliente com ID", error);
-    res.status(500).json({ error: "Erro ao pegar cliente" });
+    res.status(500).json({ error: "Erro ao buscar cliente", detalhes: error.message });
   }
 });
 
-// ** UPDATE - Rota para atualizar um cliente pelo ID **
-server.put("/cliente/:id", async (req, res) => {
+// ** UPDATE **
+app.put("/Cliente/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-    const { nome, email, senha, tel, cpf, codCli } = req.body;
-    const cliente = await Cliente.findOne({ where: { id } });
+    const cliente = await Cliente.findByPk(req.params.id);
+    if (!cliente) return res.status(404).json({ error: "Cliente não encontrado" });
 
-    if (cliente) {
-      await cliente.update({ nome, email, senha, tel, cpf, codCli });
-      res.json(cliente);
-    } else {
-      res.status(404).json({ error: "Cliente não encontrado" });
-    }
+    const { nome, email, senha, tel, cpf } = req.body;
+    await cliente.update({ nome, email, senha, tel, cpf });
+    res.json(cliente);
   } catch (error) {
-    console.error("Erro ao atualizar cliente: ", error);
-    res.status(500).json({ error: "Erro ao atualizar cliente" });
+    res.status(500).json({ error: "Erro ao atualizar cliente", detalhes: error.message });
   }
 });
 
-// ** DELETE - Rota para excluir um cliente pelo ID **
-server.delete("/cliente/:id", async (req, res) => {
+// ** DELETE **
+app.delete("/Cliente/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-    const cliente = await Cliente.findOne({ where: { id } });
+    const cliente = await Cliente.findByPk(req.params.id);
+    if (!cliente) return res.status(404).json({ error: "Cliente não encontrado" });
 
-    if (cliente) {
-      await cliente.destroy();
-      res.json({ message: "Cliente excluído com sucesso" });
-    } else {
-      res.status(404).json({ error: "Cliente não encontrado" });
-    }
+    await cliente.destroy();
+    res.json({ message: "Cliente excluído com sucesso" });
   } catch (error) {
-    console.error("Erro ao deletar cliente: ", error);
-    res.status(500).json({ error: "Erro ao deletar cliente" });
+    res.status(500).json({ error: "Erro ao excluir cliente", detalhes: error.message });
   }
 });
 
-// ** Página HTML de exemplo para formulário **
-server.get("/html", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
+// Inicia o servidor
+app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
 
-// Inicialização do servidor
-server.listen(3000, () => {
-  console.log("------------------------");
-  console.log("PORTA: 3000");
-  console.log("------------------------");
-  console.log("Conexão com o servidor: ok");
-  console.log("------------------------");
-});
+ 

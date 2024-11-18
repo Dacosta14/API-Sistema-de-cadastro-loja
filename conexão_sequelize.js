@@ -15,32 +15,52 @@ conexaoSequelize
     console.error("Conexão com banco: erro", err);
   });
 
-const Cliente = conexaoSequelize.define("Cliente", {
-  nome: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  senha: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-  },
-  tel: {
-    type: Sequelize.INTEGER,
-    allowNull: true,
-  },
-  cpf: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-  },
-  codCli: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-});
+  
+
+  const Cliente = conexaoSequelize.define("Cliente", {
+    id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,  // O 'id' continua com autoIncrement
+    },
+    nome: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    senha: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    tel: {
+      type: Sequelize.STRING,
+      allowNull: false,
+    },
+    cpf: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    codCli: {
+      type: Sequelize.STRING,
+      allowNull: true,
+      unique: true,  // Garantir que o 'codCli' seja único
+    }
+  }, {
+    hooks: {
+      beforeCreate: (cliente, options) => {
+        cliente.id = undefined; // Garantir que o id não seja definido
+        // Gerar o 'codCli' automaticamente antes de criar
+        cliente.codCli = `CLI-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      },
+      beforeUpdate: (cliente, options) => {
+        cliente.id = undefined; // Garantir que o id não seja alterado
+      }
+    }
+  });
 
  //Cliente.sync({ force: true }); // Execute apenas uma vez para criar a tabela
  Cliente.create ({
