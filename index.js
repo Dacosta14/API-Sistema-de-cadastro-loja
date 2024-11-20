@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import Cliente from "./conexão_sequelize.js"; // Importa o modelo Cliente
+import { Cliente, Funcionario } from "./conexão_sequelize.js"; // Importa o modelo Cliente
+
 
 const app = express();
 const PORT = 3000;
@@ -12,6 +13,24 @@ app.use(bodyParser.json());
 
 // Rotas
 app.get("/", (req, res) => res.send("API de Clientes"));
+
+// Rota de login
+app.post("/login", async (req, res) => {
+  const { email, senha } = req.body;
+
+  try {
+    const funcionario = await Funcionario.findOne({ where: { email, senha } });
+
+    if (funcionario) {
+      res.status(200).json({ message: "Login realizado com sucesso!" });
+    } else {
+      res.status(401).json({ error: "Credenciais inválidas" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Erro no servidor" });
+  }
+});
+
 
 // ** CREATE **
 app.post("/Cliente", async (req, res) => {
@@ -71,6 +90,9 @@ app.delete("/Cliente/:id", async (req, res) => {
     res.status(500).json({ error: "Erro ao excluir cliente", detalhes: error.message });
   }
 });
+
+
+
 
 // Inicia o servidor
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
